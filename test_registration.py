@@ -9,10 +9,10 @@ REGISTER_URL = "https://sv-students-recommend.onrender.com/pages/register.html"
 
 # Selectors based on the UI layout (SRS Section 4.2)
 NAME_INPUT = '[data-test="input-name"]'
-EMAIL_INPUT = 'input[type="email"]'
-PASSWORD_INPUT = 'input[type="password"]'
-SUBMIT_BUTTON = 'button:has-text("Create Account")'
-GOOGLE_BUTTON = 'button:has-text("Continue with Google")'
+EMAIL_INPUT = '[data-test="input-email"]'
+PASSWORD_INPUT = '[data-test="input-password"]'
+SUBMIT_BUTTON = '[data-test="btn-register"]'
+GOOGLE_BUTTON = '[data-test="btn-google-register"]'
 
 
 # ----------------------------------------------------------------------
