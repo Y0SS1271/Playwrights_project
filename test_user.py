@@ -1,4 +1,3 @@
-import re
 
 import pytest
 from playwright.sync_api import Page, expect
@@ -55,6 +54,7 @@ def test_delete_recommendation(login: Page) -> None:
         login (Page): The logged-in Playwright page object.
     """
     page = login
+    # Click on the first recommendation in the list (which is the one that created here) to view its details
     page.locator('[class="card-body"]').first.click()
 
     # Click on the delete button for the first recommendation in the list
