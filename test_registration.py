@@ -14,6 +14,7 @@ PASSWORD_INPUT = '[data-test="input-password"]'
 SUBMIT_BUTTON = '[data-test="btn-register"]'
 GOOGLE_BUTTON = '[data-test="btn-google-register"]'
 
+# <<<<<<< HEAD
 
 # ----------------------------------------------------------------------
 # Fixtures
@@ -35,6 +36,8 @@ def register_page(page: Page) -> Page:
     return page
 
 
+# =======
+# >>>>>>> 86866e0 (added files: test_login.py test_admin.py conftest.py .venv)
 # ----------------------------------------------------------------------
 # Test Cases
 # ----------------------------------------------------------------------
@@ -145,4 +148,11 @@ def test_continue_with_google_button(register_page: Page) -> None:
         None
     """
     google_btn = register_page.locator(GOOGLE_BUTTON)
+# <<<<<<< HEAD
     expect(google_btn).to_be_enabled()
+# =======
+    expect(google_btn).to_be_enabled()
+
+
+# add negative test on the registration
+# >>>>>>> 86866e0 (added files: test_login.py test_admin.py conftest.py .venv)
