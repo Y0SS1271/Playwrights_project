@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import os
 from dotenv import load_dotenv
 import pytest
@@ -25,22 +26,58 @@ def admin_credentials() -> dict:
         "email": os.getenv("TEST_ADMIN_EMAIL"),
         "password": os.getenv("TEST_ADMIN_PASSWORD")
     }
+=======
+import pytest
+from playwright.sync_api import Page, Playwright
+
+
+BASE_URL = "https://sv-students-recommend.onrender.com"
+
+
+@pytest.fixture(scope="session")
+def base_url() -> str:
+    return BASE_URL
+
+>>>>>>> 45fc338 (added 3 tests in the test_admin.py)
 
 @pytest.fixture
-def register_page(page: Page) -> Page:
-    """
-    Fixture to navigate to the registration page before each test execution.
-    Provides a clean state for every test case.
+def user_credentials() -> dict:
+    return {
+        "email": "yossibenezra20@gmail.com",
+        "password": "test13",
+    }
 
-    Args:
-        page (Page): The Playwright page fixture for browser automation.
 
-    Returns:
-        Page: The Playwright page object navigated to the registration URL.
-    """
-    page.goto(REGISTER_URL)
+@pytest.fixture
+def admin_credentials() -> dict:
+    return {
+        "email": "hagai.tregerman@gmail.com",
+        "password": "test1234",
+    }
+
+
+@pytest.fixture
+def logged_in_page(
+    page: Page,
+    user_credentials: dict,
+    base_url: str,
+) -> Page:
+
+    page.goto(f"{base_url}/pages/login.html")
+
+    page.locator('[data-test="input-email"]').fill(
+        user_credentials["email"]
+    )
+
+    page.locator('[data-test="input-password"]').fill(
+        user_credentials["password"]
+    )
+
+    page.locator('[data-test="btn-login"]').click()
+
     page.wait_for_load_state("networkidle")
 
+<<<<<<< HEAD
     yield page  # Hand over control to the test function
     page.close
 
@@ -53,9 +90,32 @@ def logged_in_page(page: Page, user_credentials: dict) -> Page:
     page.goto(f"{BASE_URL}/pages/login.html")
     page.locator('[data-test="input-email"]').fill(user_credentials["email"])
     page.locator('[data-test="input-password"]').fill(user_credentials["password"])
+=======
+    return page
+
+
+@pytest.fixture
+def admin_logged_in_page(
+    page: Page,
+    admin_credentials: dict,
+    base_url: str,
+) -> Page:
+
+    page.goto(f"{base_url}/pages/login.html")
+
+    page.locator('[data-test="input-email"]').fill(
+        admin_credentials["email"]
+    )
+
+    page.locator('[data-test="input-password"]').fill(
+        admin_credentials["password"]
+    )
+
+>>>>>>> 45fc338 (added 3 tests in the test_admin.py)
     page.locator('[data-test="btn-login"]').click()
     page.wait_for_selector('[class="header-nav"], .nav-container, body', state="visible")
 
+<<<<<<< HEAD
     # Hand over control to the test function
     yield page
     
@@ -96,3 +156,43 @@ def admin_logged_in_page(page: Page, admin_credentials: dict) -> Page:
         pass
     finally:
         page.close()
+=======
+    page.wait_for_load_state("networkidle")
+
+    error_message = page.get_by_text(
+        "Incorrect email or password",
+        exact=False
+    )
+
+    if error_message.is_visible():
+        raise AssertionError(
+            "Admin login failed: the application rejected the admin credentials."
+        )
+
+    return page
+
+
+@pytest.fixture
+def mobile_page(playwright: Playwright) -> Page:
+
+    browser = playwright.chromium.launch()
+
+    context = browser.new_context(
+        viewport={
+            "width": 390,
+            "height": 844,
+        },
+        user_agent=(
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) "
+            "AppleWebKit/605.1.15 (KHTML, like Gecko) "
+            "Version/14.0.3 Mobile/15E148 Safari/604.1"
+        ),
+    )
+
+    page = context.new_page()
+
+    yield page
+
+    context.close()
+    browser.close()
+>>>>>>> 45fc338 (added 3 tests in the test_admin.py)

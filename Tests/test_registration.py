@@ -1,6 +1,7 @@
 import pytest
 import re
-from playwright.sync_api import Page, expect
+from playwright.sync_api import Page, Playwright, expect
+
 
 # ----------------------------------------------------------------------
 # Constants & Selectors
