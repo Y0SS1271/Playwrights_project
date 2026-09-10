@@ -1,6 +1,30 @@
-# ----------------------------------------------------------------------
-# Fixtures
-# ----------------------------------------------------------------------
+import os
+from dotenv import load_dotenv
+import pytest
+from playwright.sync_api import Page, Playwright
+
+#from Tests.test_registration import REGISTER_URL
+load_dotenv()
+
+BASE_URL = "https://sv-students-recommend.onrender.com"
+REGISTER_URL = f"{BASE_URL}/pages/register.html"
+
+
+@pytest.fixture
+def user_credentials() -> dict:
+    """Returns the credentials for a regular user, loaded from environment variables."""
+    return {
+        "email": os.getenv("TEST_USER_EMAIL"),
+        "password": os.getenv("TEST_USER_PASSWORD")
+    }
+
+@pytest.fixture
+def admin_credentials() -> dict:
+    """Returns the credentials for an administrator user, loaded from environment variables."""
+    return {
+        "email": os.getenv("TEST_ADMIN_EMAIL"),
+        "password": os.getenv("TEST_ADMIN_PASSWORD")
+    }
 
 @pytest.fixture
 def register_page(page: Page) -> Page:
@@ -16,49 +40,59 @@ def register_page(page: Page) -> Page:
     """
     page.goto(REGISTER_URL)
     page.wait_for_load_state("networkidle")
-    return page
+
+    yield page  # Hand over control to the test function
+    page.close
 
 
-def get_login_token(playwright: Playwright) -> str:
-    """Verify that the login API returns a valid auth token.
-
-    Steps:
-    - Send a POST request to /auth/login with valid credentials
-    - Confirm the response status is successful
-    - Extract the auth token from the response body and store it globally
+@pytest.fixture
+def logged_in_page(page: Page, user_credentials: dict) -> Page:
     """
-    global token
-
-    request_context = playwright.request.new_context(base_url=BASE_URL)
-    response = request_context.post(
-        "/auth/login",
-        data={
-            "email": "hagai.tregerman@gmail.com",
-            "password": "test1234",
-        },
-    )
-
-    assert response.ok, f"Login request failed: {response.status} {response.text()}"
-
-    body = response.json()
-    token = body.get("token") or body.get("accessToken") or body.get("access_token")
-    
-    request_context.dispose()
-    return token
-
-
-def login(page: Page) -> Page:
-    """Fixture to log in a user before running the test.
-    
-    Args:
-        page (Page): The Playwright page object.
-        
-    Returns:
-        Page: The logged-in Playwright page object.
+    Fixture that performs login as a regular user and returns the logged-in page.
     """
-    page.goto("https://sv-students-recommend.onrender.com/pages/login.html")
-    page.locator('[data-test="input-email"]').fill("yossibenezra20@gmail.com")
-    page.locator('[data-test="input-password"]').fill("test13")
+    page.goto(f"{BASE_URL}/pages/login.html")
+    page.locator('[data-test="input-email"]').fill(user_credentials["email"])
+    page.locator('[data-test="input-password"]').fill(user_credentials["password"])
     page.locator('[data-test="btn-login"]').click()
+    page.wait_for_selector('[class="header-nav"], .nav-container, body', state="visible")
 
-    return page
+    # Hand over control to the test function
+    yield page
+    
+    # Teardown Phase: Logout execution after test finishes
+    try:
+        logout_btn = page.locator("text=Logout, [data-test='nav-logout'], #logout-btn").first
+        if logout_btn.is_visible():
+            logout_btn.click()
+            page.wait_for_url(f"{BASE_URL}/pages/login.html", timeout=5000)
+    except Exception:
+        # Prevent fixture teardown failure if test already logged out or changed state
+        pass
+    finally:
+        page.close()
+
+@pytest.fixture
+def admin_logged_in_page(page: Page, admin_credentials: dict) -> Page:
+    """
+    Fixture that performs login as an administrator user and returns the logged-in page.
+    """
+    page.goto(f"{BASE_URL}/pages/login.html")
+    page.locator('[data-test="input-email"]').fill(admin_credentials["email"])
+    page.locator('[data-test="input-password"]').fill(admin_credentials["password"])
+    page.locator('[data-test="btn-login"]').click()
+    page.wait_for_selector('[class="header-nav"], .nav-container, body', state="visible")
+
+    # Hand over control to the test function
+    yield page
+
+    # Teardown Phase: Logout execution after test finishes
+    try:
+        logout_btn = page.locator("text=Logout, [data-test='nav-logout'], #logout-btn").first
+        if logout_btn.is_visible():
+            logout_btn.click()
+            page.wait_for_url(f"{BASE_URL}/pages/login.html", timeout=5000)
+    except Exception:
+        # Prevent fixture teardown failure if test already logged out or changed state
+        pass
+    finally:
+        page.close()

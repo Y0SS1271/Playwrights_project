@@ -5,7 +5,6 @@ from playwright.sync_api import Page, expect
 # ----------------------------------------------------------------------
 # Constants & Selectors
 # ----------------------------------------------------------------------
-REGISTER_URL = "https://sv-students-recommend.onrender.com/pages/register.html"
 
 # Selectors based on the UI layout (SRS Section 4.2)
 NAME_INPUT = '[data-test="input-name"]'
@@ -14,30 +13,7 @@ PASSWORD_INPUT = '[data-test="input-password"]'
 SUBMIT_BUTTON = '[data-test="btn-register"]'
 GOOGLE_BUTTON = '[data-test="btn-google-register"]'
 
-# <<<<<<< HEAD
 
-# ----------------------------------------------------------------------
-# Fixtures
-# ----------------------------------------------------------------------
-@pytest.fixture
-def register_page(page: Page) -> Page:
-    """
-    Fixture to navigate to the registration page before each test execution.
-    Provides a clean state for every test case.
-
-    Args:
-        page (Page): The Playwright page fixture for browser automation.
-
-    Returns:
-        Page: The Playwright page object navigated to the registration URL.
-    """
-    page.goto(REGISTER_URL)
-    page.wait_for_load_state("networkidle")
-    return page
-
-
-# =======
-# >>>>>>> 86866e0 (added files: test_login.py test_admin.py conftest.py .venv)
 # ----------------------------------------------------------------------
 # Test Cases
 # ----------------------------------------------------------------------
@@ -46,10 +22,9 @@ def register_page(page: Page) -> Page:
 @pytest.mark.smoke
 def test_register_page_elements_visibility(register_page: Page) -> None:
     """
-    Test Case: Verify UI elements visibility on Registration Page.
-    
+    Test Case 1: Verify that all essential elements on the registration page are visible and interactable.
     SRS Requirement: 3.1.2 - Registration Page layout.
-    
+
     Steps:
     1. Navigate to the registration page via fixture.
     2. Verify presence of Student Name, Email, Password inputs, submit button, and Google login option.
@@ -72,8 +47,7 @@ def test_register_page_elements_visibility(register_page: Page) -> None:
 @pytest.mark.boundary
 def test_register_short_password_validation(register_page: Page) -> None:
     """
-    Test Case: Verify error message when registering with a password under 6 characters.
-    
+    Test Case 2: Verify error message when registering with a password under 6 characters.
     SRS Requirement: 3.1.2 - Password must be at least 6 characters.
     Expected Error: "Password should be at least 6 characters."
     
@@ -102,8 +76,7 @@ def test_register_short_password_validation(register_page: Page) -> None:
 @pytest.mark.sanity
 def test_successful_registration(register_page: Page) -> None:
     """
-    Test Case: Verify successful student registration with valid credentials.
-    
+    Test Case 3: Verify successful student registration with valid credentials.
     SRS Requirement: 3.1.2 - Valid registration flow.
     
     Steps:
@@ -122,19 +95,16 @@ def test_successful_registration(register_page: Page) -> None:
     
     register_page.fill(NAME_INPUT, "Test Student")
     register_page.fill(EMAIL_INPUT, unique_email)
-    register_page.fill(PASSWORD_INPUT, "test12")  # Valid password matching spec example
-    
+    register_page.fill(PASSWORD_INPUT, "test456789")  # Valid password matching spec example
     register_page.click(SUBMIT_BUTTON)
-    
-    expect(register_page).to_have_url(re.compile(r".*(login|home)\.html"))
+    expect(register_page.locator('[data-test="registered-banner"]')).to_have_text("Account created successfully! Please sign in.")
 
 
 @pytest.mark.integration
 @pytest.mark.functional
 def test_continue_with_google_button(register_page: Page) -> None:
     """
-    Test Case: Verify 'Continue with Google' button is interactive.
-    
+    Test Case 4: Verify 'Continue with Google' button is interactive.
     SRS Requirement: 3.1.2 / 3.1.3 - OAuth via Google.
     
     Steps:
@@ -148,11 +118,4 @@ def test_continue_with_google_button(register_page: Page) -> None:
         None
     """
     google_btn = register_page.locator(GOOGLE_BUTTON)
-# <<<<<<< HEAD
     expect(google_btn).to_be_enabled()
-# =======
-    expect(google_btn).to_be_enabled()
-
-
-# add negative test on the registration
-# >>>>>>> 86866e0 (added files: test_login.py test_admin.py conftest.py .venv)
