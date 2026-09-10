@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import os
 from dotenv import load_dotenv
 import pytest
@@ -13,11 +12,20 @@ REGISTER_URL = f"{BASE_URL}/pages/register.html"
 
 @pytest.fixture
 def user_credentials() -> dict:
-    """Returns the credentials for a regular user, loaded from environment variables."""
+    email = "hagai.tregerman@gmail.com"
+    password = "test1234"
+
+    if not email or not password:
+        pytest.fail(
+            "User credentials are missing."
+        )
+
     return {
-        "email": os.getenv("TEST_USER_EMAIL"),
-        "password": os.getenv("TEST_USER_PASSWORD")
+        "email": email,
+        "password": password,
     }
+
+
 
 @pytest.fixture
 def admin_credentials() -> dict:
@@ -26,7 +34,6 @@ def admin_credentials() -> dict:
         "email": os.getenv("TEST_ADMIN_EMAIL"),
         "password": os.getenv("TEST_ADMIN_PASSWORD")
     }
-=======
 import pytest
 from playwright.sync_api import Page, Playwright
 
@@ -37,23 +44,6 @@ BASE_URL = "https://sv-students-recommend.onrender.com"
 @pytest.fixture(scope="session")
 def base_url() -> str:
     return BASE_URL
-
->>>>>>> 45fc338 (added 3 tests in the test_admin.py)
-
-@pytest.fixture
-def user_credentials() -> dict:
-    return {
-        "email": "yossibenezra20@gmail.com",
-        "password": "test13",
-    }
-
-
-@pytest.fixture
-def admin_credentials() -> dict:
-    return {
-        "email": "hagai.tregerman@gmail.com",
-        "password": "test1234",
-    }
 
 
 @pytest.fixture
@@ -75,61 +65,85 @@ def logged_in_page(
 
     page.locator('[data-test="btn-login"]').click()
 
-    page.wait_for_load_state("networkidle")
-
-<<<<<<< HEAD
     yield page  # Hand over control to the test function
     page.close
 
 
 @pytest.fixture
 def logged_in_page(page: Page, user_credentials: dict) -> Page:
-    """
-    Fixture that performs login as a regular user and returns the logged-in page.
-    """
     page.goto(f"{BASE_URL}/pages/login.html")
-    page.locator('[data-test="input-email"]').fill(user_credentials["email"])
-    page.locator('[data-test="input-password"]').fill(user_credentials["password"])
-=======
+
+    page.locator('[data-test="input-email"]').fill(
+        user_credentials["email"]
+    )
+    page.locator('[data-test="input-password"]').fill(
+        user_credentials["password"]
+    )
+
+    page.locator('[data-test="btn-login"]').click()
+
+    # IMPORTANT: verify authentication actually succeeded
+    page.wait_for_load_state("networkidle")
+
+    error_message = page.get_by_text(
+        "Incorrect email or password",
+        exact=False
+    )
+
+    if error_message.is_visible():
+        pytest.fail(
+            "User login failed: invalid user credentials."
+        )
+
     return page
 
 
 @pytest.fixture
-def admin_logged_in_page(
-    page: Page,
-    admin_credentials: dict,
-    base_url: str,
-) -> Page:
+def admin_logged_in_page(page: Page, admin_credentials: dict) -> Page:
+    """Log in as an administrator and return the authenticated page."""
 
-    page.goto(f"{base_url}/pages/login.html")
+    page.goto(f"{BASE_URL}/pages/login.html")
 
     page.locator('[data-test="input-email"]').fill(
         admin_credentials["email"]
     )
-
     page.locator('[data-test="input-password"]').fill(
         admin_credentials["password"]
     )
 
->>>>>>> 45fc338 (added 3 tests in the test_admin.py)
     page.locator('[data-test="btn-login"]').click()
-    page.wait_for_selector('[class="header-nav"], .nav-container, body', state="visible")
 
-<<<<<<< HEAD
-    # Hand over control to the test function
+    # Wait for either successful navigation or the login error.
+    page.wait_for_load_state("networkidle")
+
+    error_message = page.get_by_text(
+        "Incorrect email or password",
+        exact=False
+    )
+
+    if error_message.is_visible():
+        pytest.fail(
+            "Admin login failed: the application rejected the supplied "
+            "admin email/password."
+        )
+
     yield page
-    
-    # Teardown Phase: Logout execution after test finishes
+
+    # Teardown
     try:
-        logout_btn = page.locator("text=Logout, [data-test='nav-logout'], #logout-btn").first
+        logout_btn = page.locator(
+            "text=Logout, [data-test='nav-logout'], #logout-btn"
+        ).first
+
         if logout_btn.is_visible():
             logout_btn.click()
-            page.wait_for_url(f"{BASE_URL}/pages/login.html", timeout=5000)
+            page.wait_for_url(
+                f"{BASE_URL}/pages/login.html",
+                timeout=5000
+            )
     except Exception:
-        # Prevent fixture teardown failure if test already logged out or changed state
         pass
-    finally:
-        page.close()
+
 
 @pytest.fixture
 def admin_logged_in_page(page: Page, admin_credentials: dict) -> Page:
@@ -156,19 +170,6 @@ def admin_logged_in_page(page: Page, admin_credentials: dict) -> Page:
         pass
     finally:
         page.close()
-=======
-    page.wait_for_load_state("networkidle")
-
-    error_message = page.get_by_text(
-        "Incorrect email or password",
-        exact=False
-    )
-
-    if error_message.is_visible():
-        raise AssertionError(
-            "Admin login failed: the application rejected the admin credentials."
-        )
-
     return page
 
 
@@ -195,4 +196,10 @@ def mobile_page(playwright: Playwright) -> Page:
 
     context.close()
     browser.close()
->>>>>>> 45fc338 (added 3 tests in the test_admin.py)
+
+
+@pytest.fixture
+def register_page(page: Page, base_url: str) -> Page:
+    page.goto(f"{base_url}/pages/register.html")
+    page.wait_for_load_state("domcontentloaded")
+    return page
