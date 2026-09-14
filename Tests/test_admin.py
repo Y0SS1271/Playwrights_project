@@ -23,7 +23,7 @@ SYSTEM_NAV_LINK = '[data-test="nav-system"]'
 @pytest.mark.smoke
 def test_admin_page_access_granted_for_admin(admin_logged_in_page: Page) -> None:
     """
-    Test Case: Verify Admin user can access System Management page.
+    Test Case 13: Verify Admin user can access System Management page.
     
     SRS Requirement: 2.2 / 3.4.2 / 4.9 - Admin has full access to system management.
     
@@ -45,7 +45,7 @@ def test_admin_page_access_granted_for_admin(admin_logged_in_page: Page) -> None
 @pytest.mark.security
 def test_admin_page_access_denied_for_regular_user(logged_in_page: Page) -> None:
     """
-    Test Case: Verify regular user is restricted from accessing the Admin page (RBAC).
+    Test Case 14: Verify regular user is restricted from accessing the Admin page (RBAC).
     
     SRS Requirement: 2.1 / 2.2 / 3.2.1 - System link/page blocked/hidden for regular users.
     
@@ -70,7 +70,7 @@ def test_admin_page_access_denied_for_regular_user(logged_in_page: Page) -> None
 @pytest.mark.functional
 def test_admin_delete_recommendation_by_uuid(admin_logged_in_page: Page) -> None:
     """
-    Test Case: Verify Admin can delete any recommendation using UUID.
+    Test Case 15: Verify Admin can delete any recommendation using UUID.
     
     SRS Requirement: 3.4.2 / 4.10 - Delete recommendation by ID.
     
