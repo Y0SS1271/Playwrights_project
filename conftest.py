@@ -54,7 +54,7 @@ def logged_in_page(page: Page, user_credentials: dict) -> Page:
     page.locator('[data-test="input-email"]').fill(user_credentials["email"])
     page.locator('[data-test="input-password"]').fill(user_credentials["password"])
     page.locator('[data-test="btn-login"]').click()
-    page.wait_for_selector('[class="header-nav"], .nav-container, body', state="visible")
+    page.wait_for_load_state("networkidle")  # Wait for login to complete
 
     # Hand over control to the test function
     yield page
@@ -80,7 +80,7 @@ def admin_logged_in_page(page: Page, admin_credentials: dict) -> Page:
     page.locator('[data-test="input-email"]').fill(admin_credentials["email"])
     page.locator('[data-test="input-password"]').fill(admin_credentials["password"])
     page.locator('[data-test="btn-login"]').click()
-    page.wait_for_selector('[class="header-nav"], .nav-container, body', state="visible")
+    page.wait_for_load_state("networkidle") # Wait for login to complete
 
     # Hand over control to the test function
     yield page
