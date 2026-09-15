@@ -59,7 +59,7 @@ def test_delete_recommendation(logged_in_page: Page) -> None:
 
 @pytest.mark.ui
 @pytest.mark.functional
-@pytest.mark.parametrize("category", ["All", "Book", "Movie", "Series", "Activity"])
+@pytest.mark.parametrize("category", ["all", "book", "movie", "series", "activity"])
 def test_category_filter_home(logged_in_page: Page, category: str) -> None:
     """
     Test Case 9: Parameterized test verifying Home page recommendations filter by category.
@@ -78,10 +78,12 @@ def test_category_filter_home(logged_in_page: Page, category: str) -> None:
     """
     page = logged_in_page
     filter_btn = page.locator(f"[data-test=\"filter-{category}\"]").first
+    print(category)
     
     if filter_btn.is_visible():
-        filter_btn.click()
         page.wait_for_timeout(500)
+        filter_btn.click()
+        page.wait_for_timeout(2000)
         expect(filter_btn).to_be_visible()
 
 @pytest.mark.ui
