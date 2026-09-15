@@ -62,3 +62,4 @@ def test_login_eye_toggle_password(page: Page) -> None:
     if eye_button.is_visible():
         eye_button.click()
         expect(pwd_field).to_have_attribute("type", "text")
+        expect(pwd_field).to_have_value("secret123")
